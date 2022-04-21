@@ -53,10 +53,10 @@ contract BookLibrary is Ownable {
     // #endregion
 
     // #region Events
-    event onBookAdded(uint _bookId);
-    event onBookChanged(uint _bookId);
-    event onBookBorrowed(uint _bookId);
-    event onBookReturned(uint _bookId);
+    event onBookAdded(uint256 _bookId);
+    event onBookChanged(uint256 _bookId);
+    event onBookBorrowed(uint256 _bookId);
+    event onBookReturned(uint256 _bookId);
     // #endregion
 
     // #region Owner Methods
@@ -92,7 +92,6 @@ contract BookLibrary is Ownable {
 
         emit onBookChanged(_bookId);
     }
-
     // #endregion
 
     // #region Public Methods
