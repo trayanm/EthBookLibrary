@@ -69,6 +69,34 @@ contract('BookLibrary', function (accounts) {
         }
     });
 
+    it('Test: getMyBooks', async function () {
+        await theLibrary.borrowBook(1, { from: account_1 });
+        await theLibrary.borrowBook(2, { from: account_1 });
+        await theLibrary.borrowBook(1, { from: account_2 });
+
+        const myBooksAccount_1 = await theLibrary.getMyBooks({ from: account_1 });
+        assert.equal(myBooksAccount_1.length, 2, "Should be 2 boorowed by account 1");
+        assert.equal(myBooksAccount_1[0].title, title_2, `Should be book '${title_2}' `);
+        assert.equal(myBooksAccount_1[1].title, title_3, `Should be book '${title_3}' `);
+
+        const myBooksAccount_2 = await theLibrary.getMyBooks({ from: account_2 });
+        assert.equal(myBooksAccount_2.length, 1, "Should be 1 boorowed by account 2");
+        assert.equal(myBooksAccount_2[0].title, title_2, `Should be book '${title_2}' `);
+    });
+
+    it('Test: getBookHistory', async function () {
+        await theLibrary.borrowBook(1, { from: account_1 });
+        await theLibrary.borrowBook(2, { from: account_1 });
+        await theLibrary.borrowBook(1, { from: account_2 });
+
+        const history_1 = await theLibrary.getBookHistory(1, { from: account_1 });
+        assert.equal(history_1[0].userAdddress, account_1, "Should be account 1");
+        assert.equal(history_1[1].userAdddress, account_2, "Should be account 2");
+
+        const history_2 = await theLibrary.getBookHistory(2, { from: account_1 });
+        assert.equal(history_2[0].userAdddress, account_1, "Should be account 1");
+    });
+
     it('Test: Book creation', async function () {
         let allbooks = await theLibrary.getBooks();
         assert.equal(allbooks.length, 3, 'Three books added');

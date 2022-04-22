@@ -2,10 +2,13 @@ import React, { Component } from "react";
 import BookLibrary from "./contracts/BookLibrary.json";
 import getWeb3 from "./getWeb3";
 
+import BookList from "./BookList"
+
+import 'bootstrap/dist/css/bootstrap.min.css';
 import "./App.css";
 
 class App extends Component {
-  state = { loaded: false, books: [], isOwner: false, newBookTitle: '' };
+  state = { loaded: false, books: [], myBooks: [], isOwner: false, newBookTitle: '' };
 
   componentDidMount = async () => {
     try {
@@ -24,12 +27,12 @@ class App extends Component {
       );
 
       const ownerAddress = await this.BookLibraryInstance.methods.owner().call();
-
-      this.state.isOwner = ownerAddress == this.accounts[0];
+      this.state.isOwner = ownerAddress === this.accounts[0];
       this.state.loaded = true;
       this.setState(this.state);
 
       await this.loadBooks();
+      await this.loadMyBooks();
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -43,6 +46,12 @@ class App extends Component {
   loadBooks = async () => {
     const books = await this.BookLibraryInstance.methods.getBooks().call();
     this.state.books = books;
+    this.setState(this.state);
+  };
+
+  loadMyBooks = async () => {
+    const books = await this.BookLibraryInstance.methods.getMyBooks().call({ from: this.accounts[0] });
+    this.state.myBooks = books;
     this.setState(this.state);
   };
   // #endregion
@@ -61,6 +70,18 @@ class App extends Component {
     await this.BookLibraryInstance.methods.addNewBook(this.state.newBookTitle, 1).send({ from: this.accounts[0] });
     this.state.newBookTitle = '';
     await this.loadBooks();
+  };
+
+  handlerBorrowBook = async (event) => {
+    await this.BookLibraryInstance.methods.borrowBook(event.bookId).send({ from: this.accounts[0] });
+    await this.loadBooks();
+    await this.loadMyBooks();
+  };
+
+  handlerReturnBook = async (event) => {
+    await this.BookLibraryInstance.methods.returnBook(event.bookId).send({ from: this.accounts[0] });
+    await this.loadBooks();
+    await this.loadMyBooks();
   };
   // #endregion
 
@@ -90,22 +111,8 @@ class App extends Component {
             </div>
           }
 
-          <div className="row">
-            <div className="col">
-              <h2>All books</h2>
-            </div>
-          </div>
-          <div className="row">
-            <div className="col">
-              {this.state.books.map((ele, inx) => (
-                <div key={inx} className="item-book">
-                  <h3>{ele.title}</h3>
-                  <div>totalCount: {ele.totalCount}</div>
-                  <div>availableCount: {ele.availableCount}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <BookList title="All books" books={this.state.books} onBorrowBook={this.handlerBorrowBook} />
+          <BookList title="My books" books={this.state.myBooks} onReturnBook={this.handlerReturnBook} />
         </div>
       </React.Fragment>
     );

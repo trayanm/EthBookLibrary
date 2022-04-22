@@ -53,10 +53,10 @@ contract BookLibrary is Ownable {
     // #endregion
 
     // #region Events
-    event onBookAdded(uint256 _bookId);
-    event onBookChanged(uint256 _bookId);
-    event onBookBorrowed(uint256 _bookId);
-    event onBookReturned(uint256 _bookId);
+    event onBookAdded(uint256 bookId);
+    event onBookChanged(uint256 bookId);
+    event onBookBorrowed(uint256 bookId);
+    event onBookReturned(uint256 bookId);
     // #endregion
 
     // #region Owner Methods
@@ -92,6 +92,7 @@ contract BookLibrary is Ownable {
 
         emit onBookChanged(_bookId);
     }
+
     // #endregion
 
     // #region Public Methods
@@ -107,6 +108,29 @@ contract BookLibrary is Ownable {
     function getBooks() public view returns (Book[] memory) {
         // TODO : Handle large result set
         return BookStore;
+    }
+
+    function getMyBooks() public view returns (Book[] memory) {
+        // TODO : Handle large result set
+        uint256 resultCount;
+
+        for (uint256 i = 0; i < BookStore.length; i++) {
+            if (bookLending[msg.sender][BookStore[i].bookId]) {
+                resultCount++;
+            }
+        }
+
+        Book[] memory result = new Book[](resultCount);
+        uint256 j;
+
+        for (uint256 i = 0; i < BookStore.length; i++) {
+            if (bookLending[msg.sender][BookStore[i].bookId]) {
+                result[j] = BookStore[i];
+                j++;
+            }
+        }
+
+        return result;
     }
 
     function getAvailableBooks() public view returns (Book[] memory) {
